@@ -59,7 +59,27 @@ int main(int argc, char *argv[])
     char c[100];
     sprintf(c, "%d", processcount);
     forkClkandScheduler(argv[3], argv[5], c);
+
     initClk();
+
+
+
+    displayQueue(processQueue);
+
+     while (!isEmpty(processQueue))
+    {
+        Process_Data procpointer;
+        peek(processQueue, &procpointer);
+        if (procpointer.arrival == getClk())
+        {
+
+            dequeue(processQueue, &procpointer);
+            printf("%d\n ", getClk());
+            displayProcessData(procpointer);
+        }
+    }
+
+
     kill(getpgrp(), SIGINT);
 }
 
@@ -106,4 +126,3 @@ int forkClkandScheduler(char *schedulingalgo, char *quantum, char *ProcessCount)
         }
     }
 }
- 

@@ -58,13 +58,16 @@ void enqueue(Queue* queue, Process_Data data) {
     queue->rear = newNode;
 }
 
-void dequeue(Queue* queue,Process_Data* proc) {
+
+void dequeue(Queue* queue, Process_Data* proc) {
     if (isEmpty(queue)) {
         printf("Queue is empty, cannot dequeue\n");
+        proc = NULL; 
         return;
     }
+
     Node* temp = queue->front;
-    Process_Data data = temp->data;
+    proc = &temp->data; 
     queue->front = queue->front->next;
 
     if (queue->front == NULL) {
@@ -72,16 +75,15 @@ void dequeue(Queue* queue,Process_Data* proc) {
     }
 
     free(temp);
-    proc = &data;
 }
 
 
-void peek(Queue* queue,Process_Data* proc) {
+void peek(Queue* queue, Process_Data* proc) {
     if (isEmpty(queue)) {
         printf("Queue is empty, nothing to peek\n");
         return;
     }
-        proc = &queue->front->data;
+    *proc = queue->front->data;
 }
 
 void displayQueue(Queue* queue) {
@@ -90,7 +92,6 @@ void displayQueue(Queue* queue) {
         return;
     }
     Node* current = queue->front;
-    printf("Queue elements: ");
     while (current != NULL) {
         displayProcessData(current->data);
         current = current->next;
