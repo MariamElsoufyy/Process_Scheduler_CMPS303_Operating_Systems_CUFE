@@ -14,10 +14,10 @@ typedef struct Node {
     struct Node* next;
 } Node;
 
-typedef struct Queue {
+typedef struct Queue_LinkedList {
     Node* front;
     Node* rear;
-} Queue;
+} Queue_LinkedList;
 
 
 
@@ -33,8 +33,8 @@ Node* createNode(Process_Data data) {
 }
 
 
-Queue* createQueue() {
-    Queue* queue = (Queue*)malloc(sizeof(Queue));
+Queue_LinkedList* createQueue() {
+    Queue_LinkedList* queue = (Queue_LinkedList*)malloc(sizeof(Queue_LinkedList));
     if (queue==NULL) {
         printf("Error in creating Queue\n");
         return NULL;
@@ -43,12 +43,12 @@ Queue* createQueue() {
     return queue;
 }
 
-int isEmpty(Queue* queue) {
+int isEmpty(Queue_LinkedList* queue) {
     return queue->front == NULL;
 }
 
 // Function to add an element to the queue
-void enqueue(Queue* queue, Process_Data data) {
+void enqueue(Queue_LinkedList* queue, Process_Data data) {
     Node* newNode = createNode(data);
     if (queue->rear == NULL) {
         queue->front = queue->rear = newNode;
@@ -59,7 +59,7 @@ void enqueue(Queue* queue, Process_Data data) {
 }
 
 
-void dequeue(Queue* queue, Process_Data* proc) {
+void dequeue(Queue_LinkedList* queue, Process_Data* proc) {
     if (isEmpty(queue)) {
         printf("Queue is empty, cannot dequeue\n");
         proc = NULL; 
@@ -78,7 +78,7 @@ void dequeue(Queue* queue, Process_Data* proc) {
 }
 
 
-void peek(Queue* queue, Process_Data* proc) {
+void peek(Queue_LinkedList* queue, Process_Data* proc) {
     if (isEmpty(queue)) {
         printf("Queue is empty, nothing to peek\n");
         return;
@@ -86,7 +86,7 @@ void peek(Queue* queue, Process_Data* proc) {
     *proc = queue->front->data;
 }
 
-void displayQueue(Queue* queue) {
+void displayQueue(Queue_LinkedList* queue) {
     if (isEmpty(queue)) {
         printf("Queue is empty\n");
         return;
@@ -101,3 +101,11 @@ void displayQueue(Queue* queue) {
 
 
 
+typedef struct Queue
+{
+    Process_Data *data; // Array of Process_Data* structs
+    int front;
+    int rear;
+    int capacity; // number of elements existing in the queue
+
+} Queue;

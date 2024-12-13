@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
 
     /// initializing command line variables
     char *filename = argv[1];
-    int schedulingalgorithm = atoi(argv[3]);
-    int quantum = atoi(argv[5]);
+    char* schedulingalgorithm = argv[3];
+    char* quantum = argv[5];
 
     /// Creating message Queue for sending processes to scheduler
     key_t key = ftok("schedulerqueue", 'S');
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    Queue *processQueue = createQueue();
+    Queue_LinkedList *processQueue = createQueue();
     int procid, arrtime, runtime, priority, processcount = 0;
     char line[100];
 
@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
         }
     }
     fclose(processes_file);
-    char c[100];
-    sprintf(c, "%d", processcount);
-    forkClkandScheduler(argv[3], argv[5], c);
+    char processcountstring[100];
+    sprintf(processcountstring, "%d", processcount);
+    forkClkandScheduler(schedulingalgorithm,quantum, processcountstring);
 
     initClk();
 
