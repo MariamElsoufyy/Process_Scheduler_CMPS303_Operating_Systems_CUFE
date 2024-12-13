@@ -42,6 +42,7 @@ void initClk()
         shmid = shmget(SHKEY, 4, 0444);
     }
     shmaddr = (int *)shmat(shmid, (void *)0, 0);
+    printf("clk init done\n");
 }
 
 /*

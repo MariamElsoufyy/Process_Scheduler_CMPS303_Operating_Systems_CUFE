@@ -25,9 +25,3 @@ struct msgbuff
 
 
 
-struct msgbuffPCB
-{
-    long mtype;
-    Process_Data *PCB;  //array of process data structs
-};
-

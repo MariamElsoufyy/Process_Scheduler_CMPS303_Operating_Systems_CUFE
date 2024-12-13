@@ -3,13 +3,12 @@
 /////functions Definitions
 void clearResources(int);
 
-int forkScheduler(int schedulingalgo, int quantum, int ProcessCount);
+int forkClkandScheduler(char *schedulingalgo, char *quantum, char *ProcessCount);
 int forkClk();
-void forkClockScheduler(char *algorthmNo, char *quantum, char *countProcesses);
 
 /// global variables ///
 int msgqID;
-pid_t clkpid, schedpid;
+pid_t clk_pid, scheduler_pid;
 Process_Data *Queuepointer;
 Process_Data *PCB;
 
@@ -20,13 +19,16 @@ int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
 
+    /// initializing command line variables
     char *filename = argv[1];
     int schedulingalgorithm = atoi(argv[3]);
     int quantum = atoi(argv[5]);
 
+    /// Creating message Queue for sending processes to scheduler
     key_t key = ftok("schedulerqueue", 'S');
     msgqID = msgget(key, IPC_CREAT | 0666);
 
+    /// Reading input file
     FILE *processes_file = fopen(filename, "r");
     if (filename == NULL)
     {
@@ -38,10 +40,8 @@ int main(int argc, char *argv[])
     int procid, arrtime, runtime, priority, processcount = 0;
     char line[100];
 
-    Process_Data *procpointer;
     while (fgets(line, sizeof(line), processes_file) != NULL)
     {
-        printf("ya mosahel yarab");
         if (line[0] != '#') // first character in line is # so skip comment
         {
             sscanf(line, "%d\t%d\t%d\t%d", &procid, &arrtime, &runtime, &priority);
@@ -56,16 +56,11 @@ int main(int argc, char *argv[])
         }
     }
     fclose(processes_file);
-
-    displayQueue(processQueue);
-
-    return 0;
-    printf("%d \n ", processcount);
     char c[100];
-    snprintf(c, sizeof(c), "%d", processcount);
-    forkClk();
-
-    kill(getppid(), SIGINT);
+    sprintf(c, "%d", processcount);
+    forkClkandScheduler(argv[3], argv[5], c);
+    initClk();
+    kill(getpgrp(), SIGINT);
 }
 
 ////////////////////////////////////functions////
@@ -73,8 +68,8 @@ int main(int argc, char *argv[])
 void clearResources(int signum)
 {
     // TODO Clears all resources in case of interruption
-    kill(clkpid, SIGINT);
-    kill(schedpid, SIGINT);
+    kill(clk_pid, SIGINT);
+    kill(scheduler_pid, SIGINT);
     /// free(Queuepointer);
     msgctl(msgqID, IPC_RMID, (struct msqid_ds *)0);
     exit(0);
@@ -82,11 +77,10 @@ void clearResources(int signum)
 
 ///////////////////////////////////////////forking functions////
 
-int forkClk()
+int forkClkandScheduler(char *schedulingalgo, char *quantum, char *ProcessCount)
 {
 
-    int clk_pid = fork();
-    printf("%d \n ", clk_pid);
+    clk_pid = fork();
     if (clk_pid == -1)
     {
         perror("Error in forking clock");
@@ -97,42 +91,10 @@ int forkClk()
         execl("./clk.out", "clk.out", NULL);
         sleep(3);
     }
-    return clk_pid;
-}
-
-int forkScheduler(int schedulingalgo, int quantum, int ProcessCount)
-{
-
-    int scheduler_pid = fork();
-    if (scheduler_pid == -1)
-    {
-        perror("Error in fork");
-        exit(-1);
-    }
-    else if (scheduler_pid == 0)
-    {
-        execl("./scheduler.out", "scheduler.out", schedulingalgo, quantum, ProcessCount, NULL);
-    }
-
-    return scheduler_pid;
-}
-
-void forkClockScheduler(char *algorthmNo, char *quantum, char *countProcesses)
-{
-    int clk_pid = fork();
-    if (clk_pid == -1)
-    {
-        perror("Error in fork");
-        exit(-1);
-    }
-    else if (clk_pid == 0)
-    {
-        execl("./clk.out", "clk.out", NULL);
-        sleep(3);
-    }
     else
     {
-        int scheduler_pid = fork();
+        scheduler_pid = fork();
+
         if (scheduler_pid == -1)
         {
             perror("Error in fork");
@@ -140,7 +102,8 @@ void forkClockScheduler(char *algorthmNo, char *quantum, char *countProcesses)
         }
         else if (scheduler_pid == 0)
         {
-            execl("./scheduler.out", "scheduler.out", algorthmNo, quantum, countProcesses, NULL);
+            execl("./scheduler.out", "scheduler.out", schedulingalgo, quantum, ProcessCount, NULL);
         }
     }
 }
+ 
