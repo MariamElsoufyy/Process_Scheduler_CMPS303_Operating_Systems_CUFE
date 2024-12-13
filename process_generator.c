@@ -27,6 +27,11 @@ int main(int argc, char *argv[])
     /// Creating message Queue for sending processes to scheduler
     key_t key = ftok("schedulerqueue", 'S');
     msgqID = msgget(key, IPC_CREAT | 0666);
+    if (msgqID == -1)
+    {
+        perror("Error in creating msg queue in process generator\n");
+        exit(-1);
+    }
 
     /// Reading input file
     FILE *processes_file = fopen(filename, "r");
@@ -62,23 +67,26 @@ int main(int argc, char *argv[])
 
     initClk();
 
+    // displayQueue(processQueue);
 
-
-    displayQueue(processQueue);
-
-     while (!isEmpty(processQueue))
+    while (!isEmpty(processQueue))
     {
-        Process_Data procpointer;
-        peek(processQueue, &procpointer);
-        if (procpointer.arrival == getClk())
+        Process_Data process;
+        peek(processQueue, &process);
+        if (process.arrival == getClk())
         {
 
-            dequeue(processQueue, &procpointer);
-            printf("%d\n ", getClk());
-            displayProcessData(procpointer);
+            dequeue(processQueue, &process); 
+            struct procmsgbuff msg;
+            msg.process = process;
+            msg.mtype = 1;
+            int send_val = msgsnd(msgqID, &msg, sizeof(msg.process), !IPC_NOWAIT); // Remove invalid flags
+            if (send_val == -1)
+            {
+                perror("Error in sending in process generator");
+            }
         }
     }
-
 
     kill(getpgrp(), SIGINT);
 }
@@ -92,6 +100,7 @@ void clearResources(int signum)
     kill(scheduler_pid, SIGINT);
     /// free(Queuepointer);
     msgctl(msgqID, IPC_RMID, (struct msqid_ds *)0);
+
     exit(0);
 }
 

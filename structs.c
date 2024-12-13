@@ -17,10 +17,10 @@ typedef struct Process_Data
 
 
 
-struct msgbuff
+struct procmsgbuff
 {
     long mtype;
-    Process_Data process;
+    struct Process_Data process;
 };
 
 
